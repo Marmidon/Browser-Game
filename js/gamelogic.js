@@ -503,16 +503,21 @@ function doKeyDown(e) {
     //LEFT
     if (code == 37) {
         keyleft = true;
+        e.preventDefault();
     }
     //UP
     if (code == 38) {
         keyup = true;
+        e.preventDefault();
 
     }
     //RIGHT
     if (code == 39) {
         keyright = true;
-       
+       e.preventDefault();
+    }
+    if (code==40) {
+        e.preventDefault();
     }
 
   //  keyupdate();
@@ -526,16 +531,18 @@ function doKeyUp(e) {
     var v = rocket.GetLinearVelocity();
     if (code == 37) {
         keyleft = false;
+        e.preventDefault();
     }
     else {
 
         if (code == 39) {
             keyright = false;
+            e.preventDefault();
         }
         else {
             if (code == 38) {
                 keyup = false;
-                
+                e.preventDefault();
             }
         }
 
