@@ -1,5 +1,8 @@
 
 var canvas;
+var globalScale = 1;
+var canvasScale=1;
+var box2dtoPixels = 30;
 var timer;
 var ctx;
 var width;
@@ -42,9 +45,27 @@ var audio = new Audio('music1.mp3');
 var cheering = new Audio('cheering.mp3');
 var i, j;
 var spike;
-function init() {
+var scaleFlag=true;
+var canvas = document.querySelector('canvas');
 
-    document.getElementById('audioID').play();
+function rescale () {
+	
+    var newHeight = window.innerHeight*0.8;
+    var newWidth = newHeight*0.75;
+    if (newWidth>window.innerWidth) {
+        newWidth = window.innerWidth;
+        newHeight = newWidth*4/3;
+    }
+    var oldScale = globalScale;
+    globalScale=newWidth/600;
+    console.log(globalScale);
+    var scaleModifier = globalScale/oldScale;
+    //ctx.scale(scaleModifier,scaleModifier);
+    canvas.style.width = newWidth+'px';
+    canvas.style.height = newHeight+'px';
+}
+function init() {
+document.getElementById('audioID').play();
 canvas = document.getElementById("canvas");
 ctx = canvas.getContext("2d");
 window.addEventListener("keydown", doKeyDown, true);
@@ -65,7 +86,7 @@ b2Vec2 = Box2D.Common.Math.b2Vec2
             ;
 
 level1fun();
- 
+rescale();
     
 }
 
@@ -102,45 +123,45 @@ function level1fun() {
 
     //create platforms
     bodyDef.type = b2Body.b2_staticBody;
-    fixDef.shape.SetAsBox(2, 10);
-    bodyDef.position.Set(10, 20);
+    fixDef.shape.SetAsBox(2*globalScale, 10*globalScale);
+    bodyDef.position.Set(10*globalScale, 20*globalScale);
 
     platform = level1.CreateBody(bodyDef)
     platform.CreateFixture(fixDef);
     platform.fixedRotation = true;
 
     bodyDef.type = b2Body.b2_staticBody;
-    fixDef.shape.SetAsBox(7, 1);
-    bodyDef.position.Set(10, 10);
+    fixDef.shape.SetAsBox(7*globalScale, 1*globalScale);
+    bodyDef.position.Set(10*globalScale, 10*globalScale);
     level1.CreateBody(bodyDef).CreateFixture(fixDef);
 
 
     //create ground
 
-    fixDef.shape.SetAsBox(20, 2);
-    bodyDef.position.Set(19, 27);
+    fixDef.shape.SetAsBox(20*globalScale, 2*globalScale);
+    bodyDef.position.Set(19*globalScale, 27*globalScale);
     level1.CreateBody(bodyDef).CreateFixture(fixDef);
 
     //create restrictions
-    fixDef.shape.SetAsBox(20, 2);
-    bodyDef.position.x = 12;
-    bodyDef.position.y = -2;
+    fixDef.shape.SetAsBox(20*globalScale, 2*globalScale);
+    bodyDef.position.x = 12*globalScale;
+    bodyDef.position.y = -2*globalScale;
     level1.CreateBody(bodyDef).CreateFixture(fixDef);
 
-    fixDef.shape.SetAsBox(2, 20);
-    bodyDef.position.Set(-2, 17);
+    fixDef.shape.SetAsBox(2*globalScale, 20*globalScale);
+    bodyDef.position.Set(-2*globalScale, 17*globalScale);
     level1.CreateBody(bodyDef).CreateFixture(fixDef);
 
-    fixDef.shape.SetAsBox(2, 20);
-    bodyDef.position.Set(22, 17);
+    fixDef.shape.SetAsBox(2*globalScale, 20*globalScale);
+    bodyDef.position.Set(22*globalScale, 17*globalScale);
     level1.CreateBody(bodyDef).CreateFixture(fixDef);
 
     //create fuel
     fixDef.density = 0;
     fixDef.friction = 0.5;
     fixDef.restitution = 0;
-    fixDef.shape.SetAsBox(0.3, 0.5);
-    bodyDef.position.Set(10, 8.5);
+    fixDef.shape.SetAsBox(0.3*globalScale, 0.5*globalScale);
+    bodyDef.position.Set(10*globalScale, 8.5*globalScale);
     fuel = level1.CreateBody(bodyDef);
     fuel.CreateFixture(fixDef);
     fuel.userData = "IsFuel";
@@ -150,8 +171,8 @@ function level1fun() {
     fixDef.density = 0;
     fixDef.friction = 0.5;
     fixDef.restitution = 0;
-    fixDef.shape.SetAsBox(1, 0.3);
-    bodyDef.position.Set(15, 24.75);
+    fixDef.shape.SetAsBox(1*globalScale, 0.3*globalScale);
+    bodyDef.position.Set(15*globalScale, 24.75*globalScale);
     landing = level1.CreateBody(bodyDef);
     landing.CreateFixture(fixDef);
     landing.userData = "IsLanding";
@@ -166,10 +187,10 @@ function level1fun() {
 
     bodyDef.type = b2Body.b2_dynamicBody;
 
-    fixDef.shape = new b2CircleShape(0.4);
+    fixDef.shape = new b2CircleShape(0.4*globalScale);
 
-    bodyDef.position.x = 5;
-    bodyDef.position.y = 25;
+    bodyDef.position.x = 5*globalScale;
+    bodyDef.position.y = 25*globalScale;
     rocket = level1.CreateBody(bodyDef);
     rocket.CreateFixture(fixDef);
     rocket.userData = "IsRocket";
@@ -593,9 +614,9 @@ function keyupdate() {
 
 
 function update() {
-    var scale = 30;
     
-    
+        
+        
         level1.Step(1 / 60, 10, 10);
         
         level1.DrawDebugData();
@@ -604,41 +625,42 @@ function update() {
         
         if (flag) {
             ctx.save();
-            ctx.translate(fuel.GetPosition().x * scale, fuel.GetPosition().y * scale);
+            ctx.translate(fuel.GetPosition().x * box2dtoPixels, fuel.GetPosition().y*box2dtoPixels);
             ctx.drawImage(image, -25, -30);
-            ctx.translate(-fuel.GetPosition().x * scale, -fuel.GetPosition().y * scale);
+            console.log("X is "+fuel.GetPosition().x+" Y is "+fuel.GetPosition().y)
+            ctx.translate(-fuel.GetPosition().x , -fuel.GetPosition().y);
             ctx.restore();
             ctx.save();
         }
         else {
             ctx.save();
-            ctx.translate(fuel.GetPosition().x * scale, fuel.GetPosition().y * scale);
+            ctx.translate(fuel.GetPosition().x * box2dtoPixels, fuel.GetPosition().y * box2dtoPixels);
             ctx.drawImage(image3, -25, -30);
-            ctx.translate(-fuel.GetPosition().x * scale, -fuel.GetPosition().y * scale);
+            ctx.translate(-fuel.GetPosition().x * box2dtoPixels, -fuel.GetPosition().y * box2dtoPixels);
             ctx.restore();
             ctx.save();
         }
         if (i < 100) {
-            ctx.translate(rocket.GetPosition().x * scale, rocket.GetPosition().y * scale);
+            ctx.translate(rocket.GetPosition().x * box2dtoPixels, rocket.GetPosition().y * box2dtoPixels);
             ctx.drawImage(image1, -25, -25);
-            ctx.translate(-rocket.GetPosition().x * scale, -rocket.GetPosition().y * scale);
+            ctx.translate(-rocket.GetPosition().x * box2dtoPixels, -rocket.GetPosition().y * box2dtoPixels);
             ctx.restore();
             ctx.save();
             i++;
         }
         else {
             if (j < 100) {
-                ctx.translate(rocket.GetPosition().x * scale, rocket.GetPosition().y * scale);
+                ctx.translate(rocket.GetPosition().x * box2dtoPixels, rocket.GetPosition().y * box2dtoPixels);
                 ctx.drawImage(image4, -25, -25);
-                ctx.translate(-rocket.GetPosition().x * scale, -rocket.GetPosition().y * scale);
+                ctx.translate(-rocket.GetPosition().x * box2dtoPixels, -rocket.GetPosition().y * box2dtoPixels);
                 ctx.restore();
                 ctx.save();
                 j++
             }
             else {
-                ctx.translate(rocket.GetPosition().x * scale, rocket.GetPosition().y * scale);
+                ctx.translate(rocket.GetPosition().x * box2dtoPixels, rocket.GetPosition().y * box2dtoPixels);
                 ctx.drawImage(image4, -25, -25);
-                ctx.translate(-rocket.GetPosition().x * scale, -rocket.GetPosition().y * scale);
+                ctx.translate(-rocket.GetPosition().x * box2dtoPixels, -rocket.GetPosition().y * box2dtoPixels);
                 ctx.restore();
                 ctx.save();
                 i = 0;
@@ -647,9 +669,9 @@ function update() {
             
         }
         
-        ctx.translate(landing.GetPosition().x * scale, landing.GetPosition().y * scale);
+        ctx.translate(landing.GetPosition().x * box2dtoPixels, landing.GetPosition().y * box2dtoPixels);
         ctx.drawImage(image2, -15, 10);
-        ctx.translate(-landing.GetPosition().x * scale, -landing.GetPosition().y * scale);
+        ctx.translate(-landing.GetPosition().x * box2dtoPixels, -landing.GetPosition().y * box2dtoPixels);
         ctx.restore();
         if (level == 3) {
             var v = spike.GetLinearVelocity();
@@ -675,6 +697,7 @@ function update() {
             timer=setInterval(keyupdate, 50);
             flagupdate = false;
         }
+        
    
 };
     
